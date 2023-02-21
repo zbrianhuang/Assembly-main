@@ -4,11 +4,11 @@
 
 %include "CPsub64.inc"
 
-global _start
+global main
 
 section .text
 
-_start:
+main:
 
 
 
