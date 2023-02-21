@@ -54,8 +54,8 @@ syscall
 ;Perform subtraction & print result
 mov r8, 4
 mov r14,[r15+8*r8]
-mov rax,r14
-sub rax,r9
+mov rax,r9
+sub rax,r14
 call WriteInt
 
 mov r10, rax ;save difference
@@ -149,7 +149,7 @@ syscall
 
 
 section .data
-array: DQ 100,200,300,400,500
+array: DQ 500,400,300,200,100
 linebreak: db" ",0ah,0;linebreak 
 linebreakLen:equ($-linebreak);linebreak len
 addMsg: db "Element1 + Element 3 = " ;message to display when adding elements 1 and 2
