@@ -15,6 +15,8 @@ _start:
 lea r15, [array]
 mov r14, [r15]
 mov rax,r14
+mov r14, [r15+8]
+add rax,r14
 call WriteInt
 
 ;linebreak
