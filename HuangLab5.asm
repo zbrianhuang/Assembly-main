@@ -48,7 +48,7 @@ mov rsi, subMsg
 mov rdx, subMsgLen
 syscall
 
-;used registers: r15 r14 r8 r9 r10
+
 
 
 ;Perform subtraction & print result
