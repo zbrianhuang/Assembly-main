@@ -1,0 +1,249 @@
+     1                                  ;Author: Brian Huang
+     2                                  ;Date: 2/20/23
+     3                                  ;Purpose: Lab 5
+     4                                  
+     5                                  %include "CPsub64.inc"
+     1                              <1> ; Last update: 2019/08/20
+     2                              <1> 
+     3                              <1> %ifndef CPSUB64
+     4                              <1> %define CPSUB64
+     5                              <1> 
+     6                              <1> ; ------------------------------------------
+     7                              <1> ; function prototypes
+     8                              <1> ; ------------------------------------------
+     9                              <1> extern Clearscr
+    10                              <1> extern CloseFile
+    11                              <1> extern Crlf
+    12                              <1> extern ClearBuffer
+    13                              <1> extern Delay
+    14                              <1> extern DumpMem
+    15                              <1> extern DumpCC
+    16                              <1> extern DumpEflags
+    17                              <1> extern DumpRegs
+    18                              <1> extern IsDigit
+    19                              <1> extern Mvcl
+    20                              <1> extern FileOpen
+    21                              <1> extern FileClose
+    22                              <1> extern FileRead
+    23                              <1> extern FileWrite
+    24                              <1> extern ParseDecimal32
+    25                              <1> extern ParseInteger32
+    26                              <1> extern ParseDecimal64
+    27                              <1> extern ParseInteger64
+    28                              <1> extern ReadChar
+    29                              <1> extern ReadDec
+    30                              <1> extern ReadHex
+    31                              <1> extern ReadInt
+    32                              <1> extern ReadKey
+    33                              <1> extern ReadString
+    34                              <1> extern ReadStr
+    35                              <1> extern Str_compare
+    36                              <1> extern Str_copy
+    37                              <1> extern Str_length
+    38                              <1> extern StrLength
+    39                              <1> extern Str_trim
+    40                              <1> extern Str_ucase
+    41                              <1> extern WriteBin
+    42                              <1> extern WriteBinB
+    43                              <1> extern WriteChar
+    44                              <1> extern WriteDec
+    45                              <1> extern WriteHex
+    46                              <1> extern WriteHexDbl
+    47                              <1> extern WriteHexB
+    48                              <1> extern WriteInt
+    49                              <1> extern WriteString
+    50                              <1> ; ------------------------------------------
+    51                              <1> 
+    52                              <1> %endif
+     6                                  
+     7                                  global main
+     8                                  
+     9                                  section .text
+    10                                  
+    11                                  main:
+    12                                  
+    13                                  
+    14                                  
+    15 00000000 41B800000000            mov r8, 0 ;index
+    16 00000006 4C8D3C25[00000000]      lea r15, [array]
+    17                                  
+    18                                  
+    19                                  
+    20                                  ;Addition Message
+    21 0000000E B801000000              mov rax,1
+    22 00000013 BF01000000              mov rdi, 1
+    23 00000018 48BE-                   mov rsi, addMsg
+    23 0000001A [2B00000000000000] 
+    24 00000022 BA17000000              mov rdx, addMsgLen
+    25 00000027 0F05                    syscall
+    26                                  
+    27                                  
+    28                                  ;Perform addition & print result
+    29 00000029 4D8B37                  mov r14, [r15]
+    30 0000002C 4C89F0                  mov rax,r14
+    31 0000002F 41B802000000            mov r8,  2
+    32 00000035 4F8B34C7                mov r14, [r15+8*r8]
+    33 00000039 4C01F0                  add rax,r14
+    34 0000003C 4989C1                  mov r9, rax     ;save result
+    35 0000003F E8(00000000)            call WriteInt
+    36                                  
+    37                                  ;linebreak
+    38 00000044 B801000000              mov rax,1
+    39 00000049 BF01000000              mov rdi,1
+    40 0000004E 48BE-                   mov rsi,linebreak
+    40 00000050 [2800000000000000] 
+    41 00000058 BA03000000              mov rdx,linebreakLen
+    42 0000005D 0F05                    syscall
+    43                                  
+    44                                  ;Subtraction Message
+    45 0000005F B801000000              mov rax,1
+    46 00000064 BF01000000              mov rdi, 1
+    47 00000069 48BE-                   mov rsi, subMsg
+    47 0000006B [4200000000000000] 
+    48 00000073 BA1D000000              mov rdx, subMsgLen
+    49 00000078 0F05                    syscall
+    50                                  
+    51                                  
+    52                                  
+    53                                  
+    54                                  ;Perform subtraction & print result
+    55 0000007A 41B804000000            mov r8, 4
+    56 00000080 4F8B34C7                mov r14,[r15+8*r8]
+    57 00000084 4C89C8                  mov rax,r9
+    58 00000087 4C29F0                  sub rax,r14
+    59 0000008A E8(00000000)            call WriteInt
+    60                                  
+    61 0000008F 4989C2                  mov r10, rax ;save difference
+    62                                  
+    63                                  ;linebreak
+    64 00000092 B801000000              mov rax,1
+    65 00000097 BF01000000              mov rdi,1
+    66 0000009C 48BE-                   mov rsi,linebreak
+    66 0000009E [2800000000000000] 
+    67 000000A6 BA03000000              mov rdx,linebreakLen
+    68 000000AB 0F05                    syscall
+    69                                  
+    70                                  ;Multiplication Message
+    71 000000AD B801000000              mov rax, 1
+    72 000000B2 BF01000000              mov rdi,1
+    73 000000B7 48BE-                   mov rsi, mulMsg
+    73 000000B9 [5F00000000000000] 
+    74 000000C1 BA1E000000              mov rdx, mulMsgLen
+    75 000000C6 0F05                    syscall
+    76                                  
+    77                                  ;Perform Multiplication & print product
+    78 000000C8 4D89D6                  mov r14, r10
+    79 000000CB 41B801000000            mov r8, 1
+    80 000000D1 4B8B04C7                mov rax, [r15+8*r8]
+    81 000000D5 49F7EE                  imul r14
+    82 000000D8 E8(00000000)            call WriteInt
+    83                                  
+    84                                  ;save product
+    85 000000DD 4989C1                  mov r9,rax
+    86                                  
+    87                                  ;linebreak
+    88 000000E0 B801000000              mov rax,1
+    89 000000E5 BF01000000              mov rdi,1
+    90 000000EA 48BE-                   mov rsi,linebreak
+    90 000000EC [2800000000000000] 
+    91 000000F4 BA03000000              mov rdx,linebreakLen
+    92 000000F9 0F05                    syscall
+    93                                  
+    94                                  ;Display Division Message
+    95 000000FB B801000000              mov rax,1
+    96 00000100 BF01000000              mov rdi,1
+    97 00000105 48BE-                   mov rsi,divMsg
+    97 00000107 [7D00000000000000] 
+    98 0000010F BA1F000000              mov rdx,divMsgLen
+    99 00000114 0F05                    syscall
+   100                                  
+   101                                  ;Perform Division
+   102 00000116 4C89C8                  mov rax, r9
+   103 00000119 41B803000000            mov r8,3
+   104 0000011F 4F8B34C7                mov r14, [r15+r8*8]
+   105 00000123 BA00000000              mov rdx,0   
+   106 00000128 49F7FE                  idiv DWORD r14
+   106          ******************       warning: register size specification ignored [-w+other]
+   107 0000012B E8(00000000)            call WriteInt
+   108                                  
+   109                                  
+   110                                  ;store remainder
+   111 00000130 4989D7                  mov r15, rdx
+   112                                  
+   113                                  ;linebreak
+   114 00000133 B801000000              mov rax,1
+   115 00000138 BF01000000              mov rdi,1
+   116 0000013D 48BE-                   mov rsi,linebreak
+   116 0000013F [2800000000000000] 
+   117 00000147 BA03000000              mov rdx,linebreakLen
+   118 0000014C 0F05                    syscall
+   119                                  
+   120                                  
+   121                                  ;Print Remainder Message
+   122 0000014E B801000000              mov rax,1
+   123 00000153 BF01000000              mov rdi,1
+   124 00000158 48BE-                   mov rsi,modMsg
+   124 0000015A [9C00000000000000] 
+   125 00000162 BA0B000000              mov rdx,modMsgLen
+   126 00000167 0F05                    syscall
+   127                                  
+   128                                  ;print remainder
+   129                                  
+   130 00000169 4C89F8                  mov rax,r15
+   131                                      
+   132 0000016C E8(00000000)            call WriteInt
+   133                                  
+   134                                  
+   135                                  ;linebreak
+   136 00000171 B801000000              mov rax,1
+   137 00000176 BF01000000              mov rdi,1
+   138 0000017B 48BE-                   mov rsi,linebreak
+   138 0000017D [2800000000000000] 
+   139 00000185 BA03000000              mov rdx,linebreakLen
+   140 0000018A 0F05                    syscall
+   141                                  
+   142                                  
+   143                                  
+   144                                  
+   145                                  ;exit
+   146 0000018C B83C000000              mov rax, 60
+   147 00000191 4831FF                  xor rdi, rdi
+   148 00000194 0F05                    syscall
+   149                                  
+   150                                  
+   151                                  section .data
+   152 00000000 F40100000000000090-     array: DQ 500,400,300,200,100
+   152 00000009 010000000000002C01-
+   152 00000012 000000000000C80000-
+   152 0000001B 000000000064000000-
+   152 00000024 00000000           
+   153 00000028 200A00                  linebreak: db" ",0ah,0;linebreak 
+   154                                  linebreakLen:equ($-linebreak);linebreak len
+   155 0000002B 456C656D656E743120-     addMsg: db "Element1 + Element 3 = " ;message to display when adding elements 1 and 2
+   155 00000034 2B20456C656D656E74-
+   155 0000003D 2033203D20         
+   156                                  addMsgLen: equ($-addMsg)
+   157 00000042 456C656D656E743520-     subMsg: db "Element5 - Previous Result = " ;message to display when subtracting elements 1 and 2
+   157 0000004B 2D2050726576696F75-
+   157 00000054 7320526573756C7420-
+   157 0000005D 3D20               
+   158                                  subMsgLen: equ($-subMsg)
+   159 0000005F 50726576696F757320-     mulMsg: db "Previous Result * Element 2 = " ;message to display when multiplying elements 1 and 2
+   159 00000068 526573756C74202A20-
+   159 00000071 456C656D656E742032-
+   159 0000007A 203D20             
+   160                                  mulMsgLen: equ($-mulMsg)
+   161 0000007D 50726576696F757320-     divMsg: db "Previous Result /  Element 2 = " ;message to display when getting quotient
+   161 00000086 526573756C74202F20-
+   161 0000008F 20456C656D656E7420-
+   161 00000098 32203D20           
+   162                                  divMsgLen: equ($-divMsg)
+   163 0000009C 52656D61696E646572-     modMsg: db "Remainder: "             ;Remainder
+   163 000000A5 3A20               
+   164                                  modMsgLen: equ($-modMsg)
+   165                                  
+   166                                  
+   167                                  ;100+300=400
+   168                                  ;500-400=100
+   169                                  ;100*200=20000
+   170                                  ;20000/200

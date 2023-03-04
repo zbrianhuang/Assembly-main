@@ -1,0 +1,448 @@
+     1                                  ;Brian Huang
+     2                                  ;2/27/23
+     3                                  ;practicing new APIs
+     4                                  
+     5                                  %include "Macros_CPsub64.inc"
+     1                              <1> ;--------------------------- MACROS ------------------------------------------
+     2                              <1> ; Change Log:
+     3                              <1> ; 02-06-21 CP Rename ifndef for Exit from CPExit to Exit, update mShowRegister
+     4                              <1> ;
+     5                              <1> ;
+     6                              <1> ;-----------------------------------------------------------------------------
+     7                              <1> %ifndef MACRO_CPSUB64
+     8                              <1> %define MACRO_CPSUB64
+     9                              <1> 
+    10                              <1> %define STDIN  0
+    11                              <1> %define STDOUT 1
+    12                              <1> %define STDERR 2
+    13                              <1> 
+    14                              <1> %define TAB 09h
+    15                              <1> %define NL 0Ah
+    16                              <1> 
+    17                              <1> ; define the timespec structure used in nanosleep
+    18                              <1> struc timespec
+    19 00000000 <res 00000004>      <1>      tv_sec: resd 1
+    20 00000004 <res 00000004>      <1>      tv_nsec: resd 1
+    21                              <1> endstruc
+    22                              <1> 
+    23                              <1> 
+    24                              <1> ; Synonym for NASM invoke
+    25                              <1> %ifnmacro INVOKE
+    26                              <1> %macro INVOKE 1-*.nolist
+    27                              <1>      %rep %0 - 1
+    28                              <1>      %rotate -1
+    29                              <1>      push qword %1
+    30                              <1>      %endrep
+    31                              <1>      %rotate -1
+    32                              <1>      call %1
+    33                              <1>      add rsp, ( %0 - 1 ) * 8
+    34                              <1> %endmacro
+    35                              <1> %endif
+    36                              <1> 
+    37                              <1> 
+    38                              <1> %ifnmacro mWrite
+    39                              <1> ;------------------------------------------------------
+    40                              <1> %macro mWrite 1.nolist
+    41                              <1> ;
+    42                              <1> ; Writes a string literal to standard output.
+    43                              <1> ; Receives: a string enclosed in single or double 
+    44                              <1> ;   quotes (null terminator not required).
+    45                              <1> ;------------------------------------------------------
+    46                              <1> segment .data
+    47                              <1> 	%%string: db %1, 0
+    48                              <1> segment .text
+    49                              <1> 	push	rdx
+    50                              <1> 	mov	rdx,%%string
+    51                              <1>  	call	WriteString
+    52                              <1>  	pop	rdx
+    53                              <1> %endmacro
+    54                              <1> %endif
+    55                              <1> 
+    56                              <1> 
+    57                              <1> %ifnmacro mWriteSpace
+    58                              <1> ;------------------------------------------------------
+    59                              <1> %macro mWriteSpace 0-1.nolist 1
+    60                              <1> ;
+    61                              <1> ; Writes one or more spaces to standard output.
+    62                              <1> ; Receives: an integer specifying the number of spaces.
+    63                              <1> ;   If count is blank, a single space is written.
+    64                              <1> ;------------------------------------------------------
+    65                              <1> segment .data
+    66                              <1> %%spaces: times %1 db ' '
+    67                              <1> 	db 0
+    68                              <1> segment .text
+    69                              <1> 	push	rdx
+    70                              <1> 	mov	rdx, %%spaces
+    71                              <1> 	call	WriteString
+    72                              <1> 	pop	rdx
+    73                              <1> %endmacro
+    74                              <1> %endif
+    75                              <1> 
+    76                              <1> 
+    77                              <1> %ifnmacro mShowRegister
+    78                              <1> ;---------------------------------------------------
+    79                              <1> %macro mShowRegister 2.nolist
+    80                              <1> ;
+    81                              <1> ; Displays a 64-bit register name and its contents.
+    82                              <1> ; Receives: the register string name, the register.
+    83                              <1> ; Returns:  nothing
+    84                              <1> ;---------------------------------------------------
+    85                              <1> segment .data
+    86                              <1> %%tempStr: db "  ", %1,": ",0
+    87                              <1> 
+    88                              <1> segment .text
+    89                              <1> 	push	rax		; save reg	
+    90                              <1> 	push	rdx 		; save reg
+    91                              <1> 	mov	rdx, %%tempStr	; display the register name
+    92                              <1> 	call	WriteString
+    93                              <1> 	pop	rdx		; restore reg
+    94                              <1> 	mov	rax, %2		; display the reg contents in hex
+    95                              <1> 	call	WriteHex
+    96                              <1> 	pop	rax             ; restore reg
+    97                              <1> %endmacro
+    98                              <1> %endif
+    99                              <1> 
+   100                              <1> 
+   101                              <1> %ifnmacro ShowFlag
+   102                              <1> ;---------------------------------------------------------------------
+   103                              <1> %macro ShowFlag 2.nolist
+   104                              <1> ;
+   105                              <1> ; Helper macro.
+   106                              <1> ; Display a single CPU flag value
+   107                              <1> ; Directly accesses the eflags variable in Along32.asm
+   108                              <1> ; (This macro cannot be placed in Macros.inc)
+   109                              <1> ;---------------------------------------------------------------------
+   110                              <1> segment .data
+   111                              <1> %%flagStr: db "  ",%1, "="
+   112                              <1> %%flagVal: db 0,0
+   113                              <1> 
+   114                              <1> segment .text
+   115                              <1> 	push rax
+   116                              <1> 	push rdx
+   117                              <1> 	mov  rax, qword [eflags]	; retrieve the flags
+   118                              <1> 	mov  byte [%%flagVal],'1'
+   119                              <1> 	shr  rax, %2			; shift into carry flag
+   120                              <1> 	jc   %%L1
+   121                              <1> 	mov  byte [%%flagVal],'0'
+   122                              <1> %%L1:
+   123                              <1> 	mov  rdx, %%flagStr	; display flag name and value
+   124                              <1> 	call WriteString
+   125                              <1> 	pop  rdx
+   126                              <1> 	pop  rax
+   127                              <1> %endmacro
+   128                              <1> %endif
+   129                              <1> 
+   130                              <1> 
+   131                              <1> %ifnmacro ShowCC
+   132                              <1> ;---------------------------------------------------------------------
+   133                              <1> %macro ShowCC 2.nolist
+   134                              <1> ;
+   135                              <1> ; Helper macro.
+   136                              <1> ; Display a single Condition Code Eflag name and value
+   137                              <1> ; Directly accesses the eflags variable.
+   138                              <1> ; 
+   139                              <1> ;---------------------------------------------------------------------
+   140                              <1> segment .data
+   141                              <1> %%flagStr: db "  ",%1," : "    	; flag name plus = sign
+   142                              <1> %%flagVal: db 0,0         	; flag value if 0 or 1, plus NULL
+   143                              <1> 
+   144                              <1> segment .text
+   145                              <1> 	push rax  		; save reg
+   146                              <1> 	push rdx		; save reg
+   147                              <1> 	mov  rax, qword [eflags]	; retrieve the flags
+   148                              <1> 	mov  byte [%%flagVal],'1'	; ON
+   149                              <1> 	shr  rax, %2		; shift into carry flag
+   150                              <1> 	jc   %%L1
+   151                              <1> 	mov  byte [%%flagVal],'0'	; OFF
+   152                              <1> %%L1:
+   153                              <1> 	mov  rdx, %%flagStr	; display flag name and value
+   154                              <1> 	call WriteString
+   155                              <1> 	call Crlf		; line feed
+   156                              <1> 	pop  rdx		; restore reg
+   157                              <1> 	pop  rax		; restore reg
+   158                              <1> %endmacro
+   159                              <1> %endif
+   160                              <1> 
+   161                              <1> 
+   162                              <1> 
+   163                              <1> %ifnmacro CheckInit
+   164                              <1> ;-------------------------------------------------------------
+   165                              <1> %macro CheckInit 0.nolist
+   166                              <1> ;
+   167                              <1> ; Helper macro
+   168                              <1> ; Check to see if the console handles have been initialized
+   169                              <1> ; If not, initialize them now.
+   170                              <1> ;-------------------------------------------------------------
+   171                              <1> 	cmp byte [InitFlag],0
+   172                              <1> 	jne %%exit
+   173                              <1> 	mov byte [InitFlag],1
+   174                              <1> 	call BufferFlush
+   175                              <1> %%exit:
+   176                              <1> %endmacro
+   177                              <1> %endif
+   178                              <1> 
+   179                              <1> 
+   180                              <1> %ifnmacro SaveRegs
+   181                              <1> ;-------------------------------------------------------------
+   182                              <1> %macro SaveRegs 0.nolist
+   183                              <1> ;
+   184                              <1> ; Convenience macro
+   185                              <1> ; Save Registers
+   186                              <1> ; PUSH the 16 general purpose regs to the stack.
+   187                              <1> ;-------------------------------------------------------------
+   188                              <1>        push rax
+   189                              <1>        push rbx 
+   190                              <1>        push rcx
+   191                              <1>        push rdx
+   192                              <1>        push rsi
+   193                              <1>        push rdi
+   194                              <1>        push rbp
+   195                              <1>        push rsp
+   196                              <1>        push r8 	
+   197                              <1>        push r9  
+   198                              <1>        push r10
+   199                              <1>        push r11
+   200                              <1>        push r12
+   201                              <1>        push r13
+   202                              <1>        push r14
+   203                              <1>        push r15
+   204                              <1> %%exit:
+   205                              <1> %endmacro
+   206                              <1> %endif
+   207                              <1> 
+   208                              <1> %ifnmacro RestoreRegs
+   209                              <1> ;-------------------------------------------------------------
+   210                              <1> %macro RestoreRegs 0.nolist
+   211                              <1> ;
+   212                              <1> ; Convenience macro
+   213                              <1> ; Restore Registers
+   214                              <1> ; POP the 16 general purpose regs from the stack.
+   215                              <1> ;-------------------------------------------------------------
+   216                              <1> 	pop r15
+   217                              <1> 	pop r14
+   218                              <1> 	pop r13
+   219                              <1>      	pop r12
+   220                              <1> 	pop r11 
+   221                              <1> 	pop r10
+   222                              <1>      	pop r9 
+   223                              <1>      	pop r8 
+   224                              <1> 	pop rsp
+   225                              <1>       	pop rbp 
+   226                              <1>       	pop rdi
+   227                              <1>       	pop rsi
+   228                              <1>       	pop rdx
+   229                              <1>       	pop rcx 
+   230                              <1>       	pop rbx
+   231                              <1>       	pop rax
+   232                              <1> %%exit:
+   233                              <1> %endmacro
+   234                              <1> %endif
+   235                              <1> 
+   236                              <1> ; Termination Macro
+   237                              <1> ;-------------------------------------------------------------
+   238                              <1> ;
+   239                              <1> ; Convenience macro
+   240                              <1> ; Exit to operating system under Linux.
+   241                              <1> ;-------------------------------------------------------------
+   242                              <1> %ifnmacro Exit
+   243                              <1> %macro Exit 0.nolist  
+   244                              <1>      mov rax, 60
+   245                              <1>      xor rdi, rdi
+   246                              <1>      syscall
+   247                              <1> %%exit:
+   248                              <1> %endmacro
+   249                              <1> %endif
+   250                              <1> 
+   251                              <1> ; Termination Macro
+   252                              <1> %ifnmacro CPexit
+   253                              <1> ;-------------------------------------------------------------
+   254                              <1> ;
+   255                              <1> ; Convenience macro
+   256                              <1> ; Exit to operating system under Linux.
+   257                              <1> ;-------------------------------------------------------------
+   258                              <1> %macro CPexit 0-1.nolist  
+   259                              <1>      mov rax, 60
+   260                              <1>      xor rdi, rdi
+   261                              <1>      syscall
+   262                              <1> %%exit:
+   263                              <1> %endmacro
+   264                              <1> %endif
+   265                              <1> 
+   266                              <1> %endif  ;End of Macro Definitions
+     6                                  %include "CPsub64.inc"
+     1                              <1> ; Last update: 2019/08/20
+     2                              <1> 
+     3                              <1> %ifndef CPSUB64
+     4                              <1> %define CPSUB64
+     5                              <1> 
+     6                              <1> ; ------------------------------------------
+     7                              <1> ; function prototypes
+     8                              <1> ; ------------------------------------------
+     9                              <1> extern Clearscr
+    10                              <1> extern CloseFile
+    11                              <1> extern Crlf
+    12                              <1> extern ClearBuffer
+    13                              <1> extern Delay
+    14                              <1> extern DumpMem
+    15                              <1> extern DumpCC
+    16                              <1> extern DumpEflags
+    17                              <1> extern DumpRegs
+    18                              <1> extern IsDigit
+    19                              <1> extern Mvcl
+    20                              <1> extern FileOpen
+    21                              <1> extern FileClose
+    22                              <1> extern FileRead
+    23                              <1> extern FileWrite
+    24                              <1> extern ParseDecimal32
+    25                              <1> extern ParseInteger32
+    26                              <1> extern ParseDecimal64
+    27                              <1> extern ParseInteger64
+    28                              <1> extern ReadChar
+    29                              <1> extern ReadDec
+    30                              <1> extern ReadHex
+    31                              <1> extern ReadInt
+    32                              <1> extern ReadKey
+    33                              <1> extern ReadString
+    34                              <1> extern ReadStr
+    35                              <1> extern Str_compare
+    36                              <1> extern Str_copy
+    37                              <1> extern Str_length
+    38                              <1> extern StrLength
+    39                              <1> extern Str_trim
+    40                              <1> extern Str_ucase
+    41                              <1> extern WriteBin
+    42                              <1> extern WriteBinB
+    43                              <1> extern WriteChar
+    44                              <1> extern WriteDec
+    45                              <1> extern WriteHex
+    46                              <1> extern WriteHexDbl
+    47                              <1> extern WriteHexB
+    48                              <1> extern WriteInt
+    49                              <1> extern WriteString
+    50                              <1> ; ------------------------------------------
+    51                              <1> 
+    52                              <1> %endif
+     7                                  
+     8                                  global main
+     9                                  
+    10                                  section .text
+    11                                  
+    12                                  main:
+    13                                  
+    14                                  ;inital msg
+    15 00000000 48BA-                   mov rdx, openingMessage
+    15 00000002 [0000000000000000] 
+    16 0000000A E8(00000000)            call WriteString;
+    17 0000000F E8(00000000)            call Crlf
+    18                                  ;print first input msg
+    19 00000014 48BA-                   mov rdx, firstNumberMessage
+    19 00000016 [1900000000000000] 
+    20 0000001E E8(00000000)            call WriteString
+    21 00000023 E8(00000000)            call Crlf
+    22                                  
+    23                                  ;get the 1st number
+    24 00000028 48BA-                   mov rdx,input1
+    24 0000002A [0000000000000000] 
+    25 00000032 B9FF000000              mov rcx,255
+    26 00000037 E8(00000000)            call ReadString
+    27                                  
+    28                                  ;convert to number
+    29                                  
+    30 0000003C 48BA-                   mov rdx,input1
+    30 0000003E [0000000000000000] 
+    31 00000046 4889C1                  mov rcx, rax
+    32 00000049 E8(00000000)            call ParseInteger64
+    33 0000004E 4989C0                  mov r8,rax
+    34                                  
+    35                                  ;print 2nd input msg
+    36 00000051 48BA-                   mov rdx,secondNumberMessage
+    36 00000053 [3100000000000000] 
+    37 0000005B E8(00000000)            call WriteString
+    38 00000060 E8(00000000)            call Crlf
+    39                                  
+    40                                  ;get the 2nd number
+    41 00000065 48BA-                   mov rdx,input2
+    41 00000067 [FF00000000000000] 
+    42 0000006F B9FF000000              mov rcx,255
+    43 00000074 E8(00000000)            call ReadString
+    44                                  
+    45                                  ;convert to number
+    46                                  
+    47 00000079 48BA-                   mov rdx,input2
+    47 0000007B [FF00000000000000] 
+    48 00000083 4889C1                  mov rcx, rax
+    49 00000086 E8(00000000)            call ParseInteger64
+    50 0000008B 4989C1                  mov r9,rax
+    51                                  
+    52                                  ;message for 3rd input
+    53 0000008E 48BA-                   mov rdx,thirdMessage
+    53 00000090 [4A00000000000000] 
+    54 00000098 E8(00000000)            call WriteString
+    55 0000009D E8(00000000)            call Crlf
+    56                                  
+    57                                  ;add to variable
+    58 000000A2 48BA-                   mov rdx,input3
+    58 000000A4 [FE01000000000000] 
+    59 000000AC B9FF000000              mov rcx,255
+    60 000000B1 E8(00000000)            call ReadString
+    61 000000B6 4989C2                  mov r10, rax
+    62                                  
+    63                                  
+    64                                  ;dump mem
+    65 000000B9 48BE-                   mov rsi,input3
+    65 000000BB [FE01000000000000] 
+    66 000000C3 BBFF000000              mov rbx,255
+    67 000000C8 E8(00000000)            call DumpMem
+    68                                  
+    69                                  ;check the symbol
+    70 000000CD 488B1425[FE010000]      mov rdx, [input3]; if having trouble use movzx, WORD [input3]
+    71 000000D5 4883FA2B                cmp rdx, '+' ;2bh in hex
+    72 000000D9 7410                    je addition;equALS
+    73                                  
+    74 000000DB 4883FA2D                cmp rdx, '-'
+    75 000000DF 7405                    je subtraction
+    76 000000E1 E8(00000000)            call DumpRegs
+    77                                  
+    78                                  subtraction:
+    79 000000E6 4D29C1                  sub r9,r8
+    80 000000E9 EB05                    jmp result
+    81                                  
+    82                                  addition:
+    83                                  
+    84                                  ;do da addition
+    85 000000EB 4D01C8                  add r8,r9
+    86 000000EE EB00                    jmp result
+    87                                  
+    88                                  result:
+    89                                  ;display answer 
+    90 000000F0 48BA-                   mov rdx,resultMessage
+    90 000000F2 [6100000000000000] 
+    91 000000FA E8(00000000)            call WriteString
+    92 000000FF 4C89C8                  mov rax,r9
+    93 00000102 E8(00000000)            call WriteInt
+    94 00000107 E8(00000000)            call Crlf
+    95                                  
+    96                                  ;sysexit
+    97 0000010C B83C0000004831FF0F-     call Exit
+    97 00000115 05                 
+    98                                  
+    99                                  section .data
+   100 00000000 4C6574277320646F20-     openingMessage: db "Let's do a little math." ,0,0ah
+   100 00000009 61206C6974746C6520-
+   100 00000012 6D6174682E000A     
+   101 00000019 456E74657220746865-     firstNumberMessage: db "Enter the first number",0,0ah
+   101 00000022 206669727374206E75-
+   101 0000002B 6D626572000A       
+   102 00000031 456E74657220746865-     secondNumberMessage: db "Enter the second number", 0,0ah
+   102 0000003A 207365636F6E64206E-
+   102 00000043 756D626572000A     
+   103 0000004A 456E74657220746865-     thirdMessage: db "Enter the math symbol" ,0,0ah
+   103 00000053 206D6174682073796D-
+   103 0000005C 626F6C000A         
+   104 00000061 54686520726573756C-     resultMessage: db "The result is",0,0ah
+   104 0000006A 74206973000A       
+   105                                  
+   106                                  section .bss
+   107 00000000 <res 000000FF>          input1: resb 255
+   108 000000FF <res 000000FF>          input2: resb 255
+   109 000001FE <res 000000FF>          input3: resb 255
