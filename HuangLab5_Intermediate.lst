@@ -61,195 +61,212 @@
      9                                  section .text
     10                                  main: 
     11                                  
-    12                                  ;print the first message
-    13 00000000 B801000000              mov rax,1
-    14 00000005 BF01000000              mov rdi,1
-    15 0000000A 48BE-                   mov rsi,addMessage
-    15 0000000C [0000000000000000] 
-    16 00000014 BA33000000              mov rdx,addMessageLen
-    17 00000019 0F05                    syscall
-    18                                  
-    19                                  
+    12                                  
+    13                                  start:
+    14                                  ;print the first message
+    15 00000000 B801000000              mov rax,1
+    16 00000005 BF01000000              mov rdi,1
+    17 0000000A 48BE-                   mov rsi,addMessage
+    17 0000000C [0000000000000000] 
+    18 00000014 BA33000000              mov rdx,addMessageLen
+    19 00000019 0F05                    syscall
     20                                  
     21                                  
-    22                                  ;print second msg
-    23 0000001B B801000000              mov rax,1
-    24 00000020 BF01000000              mov rdi,1
-    25 00000025 48BE-                   mov rsi,secondMessage
-    25 00000027 [3300000000000000] 
-    26 0000002F BA1E000000              mov rdx,secondMessageLen
-    27 00000034 0F05                    syscall
-    28                                  
-    29                                  ;get Input
-    30 00000036 BAFF000000              mov rdx, 255
-    31 0000003B 48B9-                   mov rcx, userInput
-    31 0000003D [0000000000000000] 
-    32 00000045 BB00000000              mov rbx, 0
-    33 0000004A B803000000              mov rax, 3
-    34 0000004F CD80                    int 80h
-    35                                  
-    36                                  ;convert Integer to string
-    37 00000051 48BA-                   mov rdx, userInput
-    37 00000053 [0000000000000000] 
-    38 0000005B B9FF000000              mov rcx, 255
-    39 00000060 E8(00000000)            call ParseInteger64
-    40                                  
-    41                                  ;save the result
-    42 00000065 4989C7                  mov r15,rax
-    43                                  
-    44                                  
-    45                                  ;duplicate so that this number is saved after calculations
-    46 00000068 4D89FD                  mov r13,r15
-    47                                  
-    48                                  ;print message asking for second input
-    49 0000006B B801000000              mov rax, 1
-    50 00000070 BF01000000              mov rdi,1
-    51 00000075 48BE-                   mov rsi, thirdMessage
-    51 00000077 [5100000000000000] 
-    52 0000007F BA1F000000              mov rdx, thirdMessageLen
-    53 00000084 0F05                    syscall
-    54                                  
-    55                                  ;get second input
-    56 00000086 BAFF000000              mov rdx,255
-    57 0000008B 48B9-                   mov rcx, userInput
-    57 0000008D [0000000000000000] 
-    58 00000095 BB00000000              mov rbx,0
-    59 0000009A B803000000              mov rax,3
-    60 0000009F CD80                    int 80h
-    61                                  
-    62                                  ;convert Integer to string
-    63 000000A1 48BA-                   mov rdx,userInput
-    63 000000A3 [0000000000000000] 
-    64 000000AB B9FF000000              mov rcx, 255
-    65 000000B0 E8(00000000)            call ParseInteger64
-    66                                  
-    67                                  ;save the number
-    68 000000B5 4989C6                  mov r14,rax
-    69                                  
-    70                                  ;print operator message
-    71 000000B8 B801000000              mov rax,1
-    72 000000BD BF01000000              mov rdi,1
-    73 000000C2 48BE-                   mov rsi,operatorMsg
-    73 000000C4 [7100000000000000] 
-    74 000000CC BA25000000              mov rdx,operatorMsgLen
-    75 000000D1 0F05                    syscall
-    76                                  
-    77                                  ;get operatoor input
-    78 000000D3 48BA-                   mov rdx,userInput
-    78 000000D5 [0000000000000000] 
-    79 000000DD B9FF000000              mov rcx,255
-    80 000000E2 E8(00000000)            call ReadString
-    81                                  
-    82                                  
+    22                                  
+    23                                  
+    24                                  ;print second msg
+    25 0000001B B801000000              mov rax,1
+    26 00000020 BF01000000              mov rdi,1
+    27 00000025 48BE-                   mov rsi,secondMessage
+    27 00000027 [3300000000000000] 
+    28 0000002F BA1E000000              mov rdx,secondMessageLen
+    29 00000034 0F05                    syscall
+    30                                  
+    31                                  ;get Input
+    32 00000036 BAFF000000              mov rdx, 255
+    33 0000003B 48B9-                   mov rcx, userInput
+    33 0000003D [0000000000000000] 
+    34 00000045 BB00000000              mov rbx, 0
+    35 0000004A B803000000              mov rax, 3
+    36 0000004F CD80                    int 80h
+    37                                  
+    38                                  ;convert Integer to string
+    39 00000051 48BA-                   mov rdx, userInput
+    39 00000053 [0000000000000000] 
+    40 0000005B B9FF000000              mov rcx, 255
+    41 00000060 E8(00000000)            call ParseInteger64
+    42                                  
+    43                                  ;save the result
+    44 00000065 4989C7                  mov r15,rax
+    45                                  
+    46                                  
+    47                                  ;duplicate so that this number is saved after calculations
+    48 00000068 4D89FD                  mov r13,r15
+    49                                  
+    50                                  ;print message asking for second input
+    51 0000006B B801000000              mov rax, 1
+    52 00000070 BF01000000              mov rdi,1
+    53 00000075 48BE-                   mov rsi, thirdMessage
+    53 00000077 [5100000000000000] 
+    54 0000007F BA1F000000              mov rdx, thirdMessageLen
+    55 00000084 0F05                    syscall
+    56                                  
+    57                                  ;get second input
+    58 00000086 BAFF000000              mov rdx,255
+    59 0000008B 48B9-                   mov rcx, userInput
+    59 0000008D [0000000000000000] 
+    60 00000095 BB00000000              mov rbx,0
+    61 0000009A B803000000              mov rax,3
+    62 0000009F CD80                    int 80h
+    63                                  
+    64                                  ;convert Integer to string
+    65 000000A1 48BA-                   mov rdx,userInput
+    65 000000A3 [0000000000000000] 
+    66 000000AB B9FF000000              mov rcx, 255
+    67 000000B0 E8(00000000)            call ParseInteger64
+    68                                  
+    69                                  ;save the number
+    70 000000B5 4989C6                  mov r14,rax
+    71                                  
+    72                                  ;print operator message
+    73 000000B8 B801000000              mov rax,1
+    74 000000BD BF01000000              mov rdi,1
+    75 000000C2 48BE-                   mov rsi,operatorMsg
+    75 000000C4 [7100000000000000] 
+    76 000000CC BA25000000              mov rdx,operatorMsgLen
+    77 000000D1 0F05                    syscall
+    78                                  
+    79                                  ;get operatoor input
+    80 000000D3 48BA-                   mov rdx,userInput
+    80 000000D5 [0000000000000000] 
+    81 000000DD B9FF000000              mov rcx,255
+    82 000000E2 E8(00000000)            call ReadString
     83                                  
-    84                                  ;perform calculations
+    84                                  
     85                                  
-    86                                  
+    86                                  ;perform calculations
     87                                  
-    88 000000E7 480FB71425-             movzx rdx, word [userInput]; if having trouble use movzx, WORD [input3]
-    88 000000EC [00000000]         
-    89 000000F0 4883FA2B                cmp rdx, '+' ;2bh in hex
-    90 000000F4 7417                    jz addition;equALS
-    91                                  
-    92 000000F6 4883FA2D                cmp rdx, '-'
-    93 000000FA 740C                    je subtraction
-    94                                  
-    95 000000FC 4883FA2F                cmp rdx, '/'
-    96 00000100 741B                    je division
-    97                                  
-    98 00000102 4883FA2A                cmp rdx, '*'
-    99 00000106 740A                    je multiplication
-   100                                  
-   101                                  subtraction:
-   102 00000108 4D29F7                  sub r15,r14
-   103 0000010B EB20                    jmp result
-   104                                  
-   105                                  addition:
+    88                                  
+    89                                  
+    90 000000E7 480FB71425-             movzx rdx, word [userInput]
+    90 000000EC [00000000]         
+    91 000000F0 4883FA2B                cmp rdx, '+' ;2bh in hex
+    92 000000F4 7417                    je addition;equALS
+    93                                  
+    94 000000F6 4883FA2D                cmp rdx, '-'
+    95 000000FA 740C                    je subtraction
+    96                                  
+    97 000000FC 4883FA2F                cmp rdx, '/'
+    98 00000100 741B                    je division
+    99                                  
+   100 00000102 4883FA2A                cmp rdx, '*'
+   101 00000106 740A                    je multiplication
+   102                                  
+   103                                  subtraction:
+   104 00000108 4D29F7                  sub r15,r14
+   105 0000010B EB20                    jmp result
    106                                  
-   107                                  ;do da addition
-   108 0000010D 4D01F7                  add r15,r14
-   109 00000110 EB1B                    jmp result
-   110                                  
-   111                                  multiplication:
-   112 00000112 4C89F8                  mov rax,r15
-   113 00000115 49F7EE                  imul r14
-   114 00000118 4989C7                  mov r15,rax;save the result back to r15
-   115                                  
-   116 0000011B EB10                    jmp result
+   107                                  addition:
+   108                                  
+   109                                  ;do da addition
+   110 0000010D 4D01F7                  add r15,r14
+   111 00000110 EB1B                    jmp result
+   112                                  
+   113                                  multiplication:
+   114 00000112 4C89F8                  mov rax,r15
+   115 00000115 49F7EE                  imul r14
+   116 00000118 4989C7                  mov r15,rax;save the result back to r15
    117                                  
-   118                                  division:
-   119 0000011D 4C89F8                  mov rax,r15
-   120 00000120 BA00000000              mov rdx,0
-   121 00000125 49F7FE                  idiv dword r14
-   121          ******************       warning: register size specification ignored [-w+other]
-   122 00000128 4989C7                  mov r15,rax
-   123 0000012B EB00                    jmp result
-   124                                  
-   125                                  result:
-   126                                  ;display answer 
-   127 0000012D 48BA-                   mov rdx,resultMessage
-   127 0000012F [9600000000000000] 
-   128 00000137 E8(00000000)            call WriteString
-   129 0000013C 4C89E8                  mov rax,r13
-   130 0000013F E8(00000000)            call WriteInt
-   131 00000144 48BA-                   mov rdx,userInput
-   131 00000146 [0000000000000000] 
-   132 0000014E E8(00000000)            call WriteString
-   133 00000153 4C89F0                  mov rax,r14
-   134 00000156 E8(00000000)            call WriteInt
-   135 0000015B 48BA-                   mov rdx,equals
-   135 0000015D [9F00000000000000] 
-   136 00000165 E8(00000000)            call WriteString
-   137                                  
-   138                                  ;result
-   139 0000016A 4C89F8                  mov rax,r15
-   140 0000016D E8(00000000)            call WriteInt
-   141 00000172 E8(00000000)            call Crlf
-   142                                  
-   143                                  
-   144                                  
+   118 0000011B EB10                    jmp result
+   119                                  
+   120                                  division:
+   121 0000011D 4C89F8                  mov rax,r15
+   122 00000120 BA00000000              mov rdx,0
+   123 00000125 49F7FE                  idiv dword r14
+   123          ******************       warning: register size specification ignored [-w+other]
+   124 00000128 4989C7                  mov r15,rax
+   125 0000012B EB00                    jmp result
+   126                                  
+   127                                  result:
+   128                                  ;display answer 
+   129 0000012D 48BA-                   mov rdx,resultMessage
+   129 0000012F [9600000000000000] 
+   130 00000137 E8(00000000)            call WriteString
+   131 0000013C 4C89E8                  mov rax,r13
+   132 0000013F E8(00000000)            call WriteDec
+   133 00000144 48BA-                   mov rdx,userInput
+   133 00000146 [0000000000000000] 
+   134 0000014E E8(00000000)            call WriteString
+   135 00000153 4C89F0                  mov rax,r14
+   136 00000156 E8(00000000)            call WriteDec
+   137 0000015B 48BA-                   mov rdx,equals
+   137 0000015D [9F00000000000000] 
+   138 00000165 E8(00000000)            call WriteString
+   139                                  
+   140                                  ;result
+   141                                  
+   142 0000016A 4C89F8                  mov rax,r15
+   143 0000016D E8(00000000)            call WriteInt
+   144 00000172 E8(00000000)            call Crlf
    145                                  
-   146                                  ;Add the numbers together
-   147                                  
-   148                                  
-   149                                  
-   150                                  
-   151                                  
-   152                                  ;exit
-   153 00000177 B83C000000              mov rax, 60
-   154 0000017C 4831FF                  xor rdi, rdi
-   155 0000017F 0F05                    syscall
-   156                                  
-   157                                  section .data
-   158 00000000 596F752077696C6C20-     addMessage: db "You will be asked for two numbers and an operator.",0ah	;first message
-   158 00000009 62652061736B656420-
-   158 00000012 666F722074776F206E-
-   158 0000001B 756D6265727320616E-
-   158 00000024 6420616E206F706572-
-   158 0000002D 61746F722E0A       
-   159                                  addMessageLen: equ($-addMessage) 								;get length of firstMessage									;getLength of Division Message
-   160 00000033 506C6561736520656E-     secondMessage: db "Please enter the first number",0ah 				;second message
-   160 0000003C 746572207468652066-
-   160 00000045 69727374206E756D62-
-   160 0000004E 65720A             
-   161                                  secondMessageLen: equ($-secondMessage)								;get length of secondMessage
-   162 00000051 506C6561736520656E-     thirdMessage: db "Please enter the second number",0ah			;third message
-   162 0000005A 746572207468652073-
-   162 00000063 65636F6E64206E756D-
-   162 0000006C 6265720A           
-   163                                  thirdMessageLen:equ($-thirdMessage)								;get the length of the third message
-   164 00000070 0A                      lineBreak: db "",0ah
-   165                                  lineBreakLen: equ($-lineBreak)
-   166 00000071 506C6561736520656E-     operatorMsg: db "Please enter an arithmetic operator",0,0ah
-   166 0000007A 74657220616E206172-
-   166 00000083 6974686D6574696320-
-   166 0000008C 6F70657261746F7200-
-   166 00000095 0A                 
-   167                                  operatorMsgLen: equ($-operatorMsg)
-   168 00000096 526573756C743A000A      resultMessage:db"Result:",0,0ah
-   169 0000009F 3D                      equals:db '='
-   170                                  equalslen: equ($-equals)
-   171                                  
-   172                                  
-   173                                  section .bss
-   174 00000000 <res 000000FF>          userInput: resb 255												;reserves 255 bytes
+   146                                  
+   147                                  ;continue?
+   148 00000177 48BA-                   mov rdx, continue
+   148 00000179 [A200000000000000] 
+   149 00000181 E8(00000000)            call WriteString
+   150 00000186 E8(00000000)            call Crlf
+   151 0000018B 48BA-                   mov rdx,userInput
+   151 0000018D [0000000000000000] 
+   152 00000195 B9FF000000              mov rcx,255
+   153 0000019A E8(00000000)            call ReadString
+   154 0000019F 480FB71425-             movzx rdx, word [userInput];
+   154 000001A4 [00000000]         
+   155 000001A8 4883FA79                cmp rdx,'y'
+   156 000001AC 0F844EFEFFFF            je start
+   157 000001B2 E8(00000000)            call DumpRegs
+   158                                  
+   159                                  
+   160                                  
+   161                                  exit:
+   162                                  
+   163                                  ;exit
+   164 000001B7 B83C000000              mov rax, 60
+   165 000001BC 4831FF                  xor rdi, rdi
+   166 000001BF 0F05                    syscall
+   167                                  
+   168                                  section .data
+   169 00000000 596F752077696C6C20-     addMessage: db "You will be asked for two numbers and an operator.",0ah	;first message
+   169 00000009 62652061736B656420-
+   169 00000012 666F722074776F206E-
+   169 0000001B 756D6265727320616E-
+   169 00000024 6420616E206F706572-
+   169 0000002D 61746F722E0A       
+   170                                  addMessageLen: equ($-addMessage) 								;get length of firstMessage									;getLength of Division Message
+   171 00000033 506C6561736520656E-     secondMessage: db "Please enter the first number",0ah 				;second message
+   171 0000003C 746572207468652066-
+   171 00000045 69727374206E756D62-
+   171 0000004E 65720A             
+   172                                  secondMessageLen: equ($-secondMessage)								;get length of secondMessage
+   173 00000051 506C6561736520656E-     thirdMessage: db "Please enter the second number",0ah			;third message
+   173 0000005A 746572207468652073-
+   173 00000063 65636F6E64206E756D-
+   173 0000006C 6265720A           
+   174                                  thirdMessageLen:equ($-thirdMessage)								;get the length of the third message
+   175 00000070 0A                      lineBreak: db "",0ah
+   176                                  lineBreakLen: equ($-lineBreak)
+   177 00000071 506C6561736520656E-     operatorMsg: db "Please enter an arithmetic operator",0,0ah
+   177 0000007A 74657220616E206172-
+   177 00000083 6974686D6574696320-
+   177 0000008C 6F70657261746F7200-
+   177 00000095 0A                 
+   178                                  operatorMsgLen: equ($-operatorMsg)
+   179 00000096 526573756C743A000A      resultMessage:db"Result:",0,0ah
+   180 0000009F 3D000A                  equals:db '=',0,0ah
+   181                                  equalslen: equ($-equals)
+   182 000000A2 436F6E74696E75653F-     continue: db "Continue? y/n",0,0ah
+   182 000000AB 20792F6E000A       
+   183                                  
+   184 000000B1 79                      y: db  "y"
+   185                                  
+   186                                  section .bss
+   187 00000000 <res 000000FF>          userInput: resb 255												;reserves 255 bytes

@@ -9,6 +9,8 @@ global main
 section .text
 main: 
 
+
+start:
 ;print the first message
 mov rax,1
 mov rdi,1
@@ -85,9 +87,9 @@ call ReadString
 
 
 
-movzx rdx, word [userInput]; if having trouble use movzx, WORD [input3]
+movzx rdx, word [userInput]
 cmp rdx, '+' ;2bh in hex
-jz addition;equALS
+je addition;equALS
 
 cmp rdx, '-'
 je subtraction
@@ -127,27 +129,36 @@ result:
 mov rdx,resultMessage
 call WriteString
 mov rax,r13
-call WriteInt
+call WriteDec
 mov rdx,userInput
 call WriteString
 mov rax,r14
-call WriteInt
+call WriteDec
 mov rdx,equals
 call WriteString
 
 ;result
+
 mov rax,r15
 call WriteInt
 call Crlf
 
 
+;continue?
+mov rdx, continue
+call WriteString
+call Crlf
+mov rdx,userInput
+mov rcx,255
+call ReadString
+movzx rdx, word [userInput];
+cmp rdx,'y'
+je start
 
 
-;Add the numbers together
 
 
-
-
+exit:
 
 ;exit
 mov rax, 60
@@ -166,9 +177,11 @@ lineBreakLen: equ($-lineBreak)
 operatorMsg: db "Please enter an arithmetic operator",0,0ah
 operatorMsgLen: equ($-operatorMsg)
 resultMessage:db"Result:",0,0ah
-equals:db '='
+equals:db '=',0,0ah
 equalslen: equ($-equals)
+continue: db "Continue? y/n",0,0ah
 
+y: db  "y"
 
 section .bss
 userInput: resb 255												;reserves 255 bytes
