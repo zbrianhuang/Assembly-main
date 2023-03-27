@@ -1,171 +1,260 @@
 ;Author: Brian Huang
-;Date: 3/22/23
-;Purpose: Lab 5
+;Date: 3/2/23
+;Purpose: Lab 4
 
 %include "CPsub64.inc"
 %include "Macros_CPsub64.inc"
 global main
 
 section .text
-
-main:
-
+main: 
 
 
-mov r8, 0 ;index
-lea r15, [array]
-
-
-
-;Addition Message
-mov rax,1
-mov rdi, 1
-mov rsi, addMsg
-mov rdx, addMsgLen
-syscall
-
-
-;Perform addition & print result
-mov r14, [r15]
-mov rax,r14
-mov r8,  2
-mov r14, [r15+8*r8]
-add rax,r14
-mov r9, rax     ;save result
-call WriteInt
-
-;linebreak
+start:
+;print the first message
 mov rax,1
 mov rdi,1
-mov rsi,linebreak
-mov rdx,linebreakLen
-syscall
-
-;Subtraction Message
-mov rax,1
-mov rdi, 1
-mov rsi, subMsg
-mov rdx, subMsgLen
+mov rsi,addMessage
+mov rdx,addMessageLen
 syscall
 
 
 
 
-;Perform subtraction & print result
-mov r8, 4
-mov r14,[r15+8*r8]
-mov rax,r9
-sub rax,r14
-call WriteInt
-
-mov r10, rax ;save difference
-
-;linebreak
+;print second msg
 mov rax,1
 mov rdi,1
-mov rsi,linebreak
-mov rdx,linebreakLen
+mov rsi,secondMessage
+mov rdx,secondMessageLen
 syscall
 
-;Multiplication Message
+;get Input
+mov rdx, 255
+mov rcx, userInput
+mov rbx, 0
+mov rax, 3
+int 80h
+
+;convert Integer to string
+mov rdx, userInput
+mov rcx, 255
+call ParseInteger64
+
+;save the result
+mov r15,rax
+
+
+;duplicate so that this number is saved after calculations
+mov r13,r15
+
+;print message asking for second input
 mov rax, 1
 mov rdi,1
-mov rsi, mulMsg
-mov rdx, mulMsgLen
+mov rsi, thirdMessage
+mov rdx, thirdMessageLen
 syscall
 
-;Perform Multiplication & print product
-mov r14, r10
-mov r8, 1
-mov rax, [r15+8*r8]
-imul r14
-call WriteInt
+;get second input
+mov rdx,255
+mov rcx, userInput
+mov rbx,0
+mov rax,3
+int 80h
 
-;save product
-mov r9,rax
+;convert Integer to string
+mov rdx,userInput
+mov rcx, 255
+call ParseInteger64
 
-;linebreak
+;save the number
+mov r14,rax
+
+;print operator message
 mov rax,1
 mov rdi,1
-mov rsi,linebreak
-mov rdx,linebreakLen
+mov rsi,operatorMsg
+mov rdx,operatorMsgLen
 syscall
 
-;Display Division Message
-mov rax,1
-mov rdi,1
-mov rsi,divMsg
-mov rdx,divMsgLen
-syscall
-
-;Perform Division
-mov rax, r9
-mov r8,3
-mov r14, [r15+r8*8]
-mov rdx,0   
-idiv DWORD r14
-call WriteInt
+;get operatoor input
+mov rdx,userInput
+mov rcx,255
+call ReadString
 
 
-;store remainder
-mov r15, rdx
-
-;linebreak
-mov rax,1
-mov rdi,1
-mov rsi,linebreak
-mov rdx,linebreakLen
-syscall
+push rax
+push rdx
 
 
-;Print Remainder Message
-mov rax,1
-mov rdi,1
-mov rsi,modMsg
-mov rdx,modMsgLen
-syscall
-
-;print remainder
-
-mov rax,r15
-    
-call WriteInt
+call math
 
 
-;linebreak
-mov rax,1
-mov rdi,1
-mov rsi,linebreak
-mov rdx,linebreakLen
-syscall
+pop rax
+pop rdx
+
+;continue?
+mov rdx, continue
+call WriteString
+call Crlf
+mov rdx,userInput
+mov rcx,255
+call ReadString
+movzx rdx, word [userInput];
+cmp rdx,'y'
+je start
 
 
 
+
+exit:
 
 ;exit
-Exit
+mov rax, 60
+xor rdi, rdi
+syscall
 
+
+;math function
 math:
 
+;prologue
+push rbp
+mov rbp,rsp;set pointer to current top on the stack
+push rbx
 
+
+;perform calculations
+
+
+
+movzx rdx, word [userInput]
+cmp rdx, '+' ;2bh in hex
+je addition;equALS
+
+cmp rdx, '-'
+je subtraction
+
+cmp rdx, '/'
+je division
+
+cmp rdx, '*'
+je multiplication
+
+
+
+
+
+subtraction:
+sub r15,r14
+mov rdx,resultMessage
+call WriteString
+mov rax,r13
+call WriteDec
+mov rdx,userInput
+call WriteString
+mov rax,r14
+call WriteDec
+mov rdx,equals
+call WriteString
+mov rax,r15
+call WriteInt
+jmp result
+
+addition:
+
+;do da addition
+add r15,r14
+mov rdx,resultMessage
+call WriteString
+mov rax,r13
+call WriteDec
+mov rdx,userInput
+call WriteString
+mov rax,r14
+call WriteDec
+mov rdx,equals
+call WriteString
+mov rax,r15
+call WriteInt
+jmp result
+
+multiplication:
+mov rax,r15
+imul r14
+mov r15,rax;save the result back to r15
+mov rdx,resultMessage
+call WriteString
+mov rax,r13
+call WriteDec
+mov rdx,userInput
+call WriteString
+mov rax,r14
+call WriteDec
+mov rdx,equals
+call WriteString
+mov rax,r15
+call WriteInt
+jmp result
+
+division:
+mov rax,r15
+mov rdx,0
+idiv dword r14
+mov r15,rax
+mov r12,rdx
+mov rdx,resultMessage
+call WriteString
+mov rax,r13
+call WriteDec
+mov rdx,userInput
+call WriteString
+mov rax,r14
+call WriteDec
+mov rdx,equals
+call WriteString
+mov rax,r15
+call WriteInt
+mov rdx,r
+call WriteString
+mov rax,r12
+call WriteDec
+
+jmp result
+
+result:
+;display answer 
+
+;result
+
+
+call Crlf
+
+;epilogue
+pop rbx
+pop rbp 
+ret
+
+
+
+;get Input
 
 section .data
-array: DQ 500,400,300,200,100
-linebreak: db" ",0ah,0;linebreak 
-linebreakLen:equ($-linebreak);linebreak len
-addMsg: db "Element1 + Element 3 = " ;message to display when adding elements 1 and 2
-addMsgLen: equ($-addMsg)
-subMsg: db "Element5 - Previous Result = " ;message to display when subtracting elements 1 and 2
-subMsgLen: equ($-subMsg)
-mulMsg: db "Previous Result * Element 2 = " ;message to display when multiplying elements 1 and 2
-mulMsgLen: equ($-mulMsg)
-divMsg: db "Previous Result /  Element 2 = " ;message to display when getting quotient
-divMsgLen: equ($-divMsg)
-modMsg: db "Remainder: "             ;Remainder
-modMsgLen: equ($-modMsg)
+addMessage: db "You will be asked for two numbers and an operator.",0ah	;first message
+addMessageLen: equ($-addMessage) 								;get length of firstMessage									;getLength of Division Message
+secondMessage: db "Please enter the first number",0ah 				;second message
+secondMessageLen: equ($-secondMessage)								;get length of secondMessage
+thirdMessage: db "Please enter the second number",0ah			;third message
+thirdMessageLen:equ($-thirdMessage)								;get the length of the third message
+lineBreak: db "",0ah
+lineBreakLen: equ($-lineBreak)
+operatorMsg: db "Please enter an arithmetic operator",0,0ah
+operatorMsgLen: equ($-operatorMsg)
+resultMessage:db"Result:",0,0ah
+equals:db '=',0,0ah
+equalslen: equ($-equals)
+continue: db "Continue? y/n",0,0ah
 
-
-;100+300=400
-;500-400=100
-;100*200=20000
-;20000/200
+y: db  "y",0
+r: db " remainder:",0
+section .bss
+userInput: resb 255												;reserves 255 bytes
