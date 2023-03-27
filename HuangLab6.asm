@@ -1,6 +1,6 @@
 ;Author: Brian Huang
-;Date: 3/2/23
-;Purpose: Lab 4
+;Date: 3/26/23
+;Purpose: Lab 6
 
 %include "CPsub64.inc"
 %include "Macros_CPsub64.inc"
@@ -104,9 +104,6 @@ cmp rdx,'y'
 je start
 
 
-
-
-exit:
 
 ;exit
 mov rax, 60
