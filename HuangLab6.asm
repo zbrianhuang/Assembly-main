@@ -81,14 +81,14 @@ mov rdx,userInput
 mov rcx,255
 call ReadString
 
-
+;push registers onto stack since they are used in the function
 push rax
 push rdx
 
 
 call math
 
-
+;retrieve the register values
 pop rax
 pop rdx
 
@@ -106,7 +106,6 @@ je start
 
 
 
-exit:
 
 ;exit
 mov rax, 60
