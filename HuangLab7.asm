@@ -59,12 +59,12 @@ notEqual:
     xor rdx,rdx
     mov rcx,r15
     cmpsb
-    jne wrong
+    jne wrong;check if the strings are completely different
     mov rcx,r15;counter
     
-    inc rdx
-    inc rdx
-    strLoop:
+    inc rdx;inc becacuse cmpsb was used
+    inc rdx;inc to offset the fact that rdx starts at 0
+    strLoop:;loop through each character
         
         cmpsb
         jne exitLoop
