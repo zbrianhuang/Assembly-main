@@ -327,134 +327,15 @@
      9                                  section .text
     10                                  
     11                                  main:
-    12                                  ;print msg 1 and get input and save
-    13 00000000 48BA-                   mov rdx, msg1
-    13 00000002 [0000000000000000] 
-    14 0000000A E8(00000000)            call WriteString
-    15 0000000F E8(00000000)            call Crlf
-    16 00000014 48BA-                   mov rdx,userInput1
-    16 00000016 [0000000000000000] 
-    17 0000001E B9FF000000              mov rcx,255
-    18 00000023 E8(00000000)            call ReadString
+    12                                  
+    13                                  
+    14                                  strLoop:
+    15                                          
+    16 00000000 A6                              cmpsb
+    17 00000001 7505                            jne exitLoop
+    18 00000003 48FFC2                          inc rdx
     19                                  
-    20 00000028 4C8B3C25[00000000]      mov r15,[userInput1]
-    21                                  
-    22                                  ;print msg 2, get input and save
-    23 00000030 48BA-                   mov rdx, msg2
-    23 00000032 [1F00000000000000] 
-    24 0000003A E8(00000000)            call WriteString
-    25 0000003F E8(00000000)            call Crlf
-    26 00000044 48BA-                   mov rdx,userInput2
-    26 00000046 [FF00000000000000] 
-    27 0000004E B9FF000000              mov rcx,255
-    28 00000053 E8(00000000)            call ReadString
-    29                                  
-    30                                  
-    31                                  ;check if strings are equal
-    32 00000058 48BE-                   mov rsi, userInput1
-    32 0000005A [0000000000000000] 
-    33 00000062 48BF-                   mov rdi, userInput2
-    33 00000064 [FF00000000000000] 
-    34                                  
-    35                                  
-    36                                  
-    37                                  
-    38 0000006C B9FF000000              mov rcx,255
-    39 00000071 FC                      cld
-    40 00000072 F3A6                    repe cmpsb
-    41                                  
-    42 00000074 7519                    jne notEqual
-    43                                  
-    44 00000076 48BA-                   mov rdx,equalstr
-    44 00000078 [3F00000000000000] 
-    45 00000080 E8(00000000)            call WriteString
-    46 00000085 E8(00000000)            call Crlf
-    47 0000008A E988000000              jmp finish
-    48                                  
-    49                                  notEqual:
-    50                                  
-    51                                  ;get str length
-    52 0000008F 48BE-                       mov rsi, userInput1
-    52 00000091 [0000000000000000] 
-    53 00000099 48BF-                       mov rdi, userInput2
-    53 0000009B [FF00000000000000] 
-    54 000000A3 48BA-                       mov rdx,userInput1
-    54 000000A5 [0000000000000000] 
-    55 000000AD E8(00000000)                call StrLength
-    56 000000B2 4989C7                      mov r15,rax
-    57                                  
-    58 000000B5 FC                          cld
-    59 000000B6 4831D2                      xor rdx,rdx
-    60 000000B9 4C89F9                      mov rcx,r15
-    61 000000BC A6                          cmpsb
-    62 000000BD 7526                        jne wrong
-    63 000000BF 4C89F9                      mov rcx,r15;counter
-    64                                      
-    65 000000C2 4C89F8                      mov rax,r15
-    66 000000C5 E8(00000000)                call WriteInt
-    67 000000CA E8(00000000)                call Crlf
-    68 000000CF 48FFC2                      inc rdx
-    69 000000D2 48FFC2                      inc rdx
-    70                                      strLoop:
-    71                                          
-    72 000000D5 A6                              cmpsb
-    73 000000D6 7523                            jne exitLoop
-    74 000000D8 48FFC2                          inc rdx
-    75                                          
-    76 000000DB 4889D0                          mov rax,rdx
-    77 000000DE E8(00000000)                    call WriteInt
-    78                                  
-    79 000000E3 E2F0                            loop strLoop
-    80                                  
-    81                                  
-    82                                  
-    83                                      ;completely unequal
-    84                                      wrong:
-    85 000000E5 48BA-                       mov rdx,notequalstr
-    85 000000E7 [5D00000000000000] 
-    86 000000EF E8(00000000)                call WriteString
-    87 000000F4 E8(00000000)                call Crlf
-    88                                  
-    89 000000F9 EB1C                        jmp finish
-    90                                  
-    91                                          
-    92                                  
-    93                                      exitLoop:
-    94 000000FB 4989D0                      mov r8,rdx
-    95 000000FE 48BA-                       mov rdx, almostequalstr
-    95 00000100 [7E00000000000000] 
-    96 00000108 4C89C0                      mov rax,r8
-    97                                      
-    98 0000010B E8(00000000)                call WriteString 
-    99 00000110 E8(00000000)                call WriteDec
-   100                                  
-   101 00000115 EB00                        jmp finish
-   102                                  finish:
-   103 00000117 B83C0000004831FF0F-     Exit
-   103 00000120 05                 
-   104                                  
-   105                                  
-   106                                  section .data
-   107 00000000 506C6561736520656E-     msg1: db 'Please enter the first string',0,0ah
-   107 00000009 746572207468652066-
-   107 00000012 697273742073747269-
-   107 0000001B 6E67000A           
-   108 0000001F 506C6561736520656E-     msg2: db 'Please enter the second string',0,0ah
-   108 00000028 746572207468652073-
-   108 00000031 65636F6E6420737472-
-   108 0000003A 696E67000A         
-   109 0000003F 737472696E67732061-     equalstr: db 'strings are exactly the same',0,0ah
-   109 00000048 72652065786163746C-
-   109 00000051 79207468652073616D-
-   109 0000005A 65000A             
-   110 0000005D 737472696E67206172-     notequalstr: db 'string are completely different',0,0ah
-   110 00000066 6520636F6D706C6574-
-   110 0000006F 656C79206469666665-
-   110 00000078 72656E74000A       
-   111 0000007E 737472696E67206973-     almostequalstr: db 'string is equal until character #',0,0ah
-   111 00000087 20657175616C20756E-
-   111 00000090 74696C206368617261-
-   111 00000099 637465722023000A   
-   112                                  section .bss
-   113 00000000 <res 000000FF>          userInput1: resb 255
-   114 000000FF <res 000000FF>          userInput2: resb 255
+    20 00000006 E2F8                            loop strLoop
+    21                                  exitLoop:
+    22 00000008 4889C2                  mov rdx,rax
+    23 0000000B E8(00000000)            call DumpRegs
