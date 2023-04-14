@@ -11,57 +11,55 @@ section .text
 
 main:
 
+;get the number of arguments
 mov rcx,rdi
-dec rcx;ignore title program
-
+mov r14,rdi
+dec r14
 mov rax,rcx
+
+
+;check if there are zero arguments
+cmp r14,0
+jne notZero
+mov rdx,noArgs
+call WriteString
+call Crlf
+jmp exit
+
+notZero:
 call WriteDec
 call Crlf
 mov r15,8
-    print_args:
+    print_args:;loop through each argument
     
+
+    ;get arguments & print
     push rdi
     push rsi
-    
-    
-    
     add rsi,r15
-
-    
     sub rsp,8
-    
     mov rdi,[rsi]
-    
-    mov rax,rsi
-    call WriteInt
-    call Crlf
-
-
     call puts
-    
     add rsp,8
-
-
     pop rsi
-    
     pop rdi
-    
 
-    ;counter
-    
-    
-    
-
-    cmp rcx,1
+   
+    ;check if loop has looped enough times
+    cmp r14,1
     je exit
-    dec rcx
+    dec r14
+    
     add r15,8
     jmp print_args
     
     exit:
+    mov rdx,programCompleted
+    call WriteString
+    call Crlf
     ret
 
 
 section .data
-
-blankLine: db ' ',0,0ah
+noArgs: db "There are no arguments",0,0ah
+programCompleted: db "The program is completed",0,0ah
