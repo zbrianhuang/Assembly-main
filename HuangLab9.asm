@@ -11,10 +11,13 @@ section .text
 
 main:
 
-mov r14,rdi
 mov rcx,rdi
 dec rcx;ignore title program
-mov r15,0
+
+mov rax,rcx
+call WriteDec
+call Crlf
+mov r15,8
     print_args:
     
     push rdi
@@ -22,20 +25,29 @@ mov r15,0
     
     
     
-    add rsp,r15
+    add rsi,r15
+
+    
     sub rsp,8
     
     mov rdi,[rsi]
+    
+    mov rax,rsi
+    call WriteInt
+    call Crlf
+
+
     call puts
     
     add rsp,8
 
 
     pop rsi
+    
     pop rdi
     
 
-    counter
+    ;counter
     
     
     
