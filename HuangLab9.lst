@@ -329,23 +329,49 @@
     11                                  
     12                                  main:
     13                                  
-    14 00000000 4889F9                  mov rcx,rdi
-    15 00000003 41BF08000000            mov r15,8
-    16                                      print_args:
-    17                                  
-    18                                      
+    14 00000000 4989FE                  mov r14,rdi
+    15 00000003 4889F9                  mov rcx,rdi
+    16 00000006 48FFC9                  dec rcx;ignore title program
+    17 00000009 41BF00000000            mov r15,0
+    18                                      print_args:
     19                                      
-    20                                  
-    21                                      ;counter
-    22 00000009 48FFC9                      dec rcx
-    23                                      
-    24 0000000C 4889C8                      mov rax,rcx
-    25 0000000F E8(00000000)                call WriteInt
-    26 00000014 75F3                        jnz print_args
-    27                                      
-    28 00000016 C3                      ret
-    29                                  
-    30                                  
-    31                                  section .data
-    32                                  
-    33 00000000 20000A                  blankLine: db ' ',0,0ah
+    20 0000000F 57                          push rdi
+    21 00000010 56                          push rsi
+    22                                      
+    23 00000011 4889C8                      mov rax,rcx
+    24 00000014 E8(00000000)                call WriteInt
+    25                                      
+    26 00000019 4C01FC                      add rsp,r15
+    27 0000001C 4883EC08                    sub rsp,8
+    28                                      
+    29 00000020 488B3E                      mov rdi,[rsi]
+    30 00000023 E8(00000000)                call puts
+    31                                      
+    32 00000028 4883C408                    add rsp,8
+    33                                  
+    34 0000002C 4889C8                  mov rax,rcx
+    35 0000002F E8(00000000)                call WriteInt
+    36                                  
+    37 00000034 5E                          pop rsi
+    38 00000035 5F                          pop rdi
+    39                                      
+    40                                  
+    41                                      counter
+    41          ******************       warning: label alone on a line without a colon might be in error [-w+orphan-labels]
+    42                                      
+    43                                      
+    44                                      
+    45                                  
+    46 00000036 4883F901                    cmp rcx,1
+    47 0000003A 7409                        je exit
+    48 0000003C 48FFC9                      dec rcx
+    49 0000003F 4983C708                    add r15,8
+    50 00000043 EBCA                        jmp print_args
+    51                                      
+    52                                      exit:
+    53 00000045 C3                          ret
+    54                                  
+    55                                  
+    56                                  section .data
+    57                                  
+    58 00000000 20000A                  blankLine: db ' ',0,0ah

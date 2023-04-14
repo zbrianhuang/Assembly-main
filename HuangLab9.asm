@@ -11,21 +11,43 @@ section .text
 
 main:
 
+mov r14,rdi
 mov rcx,rdi
-mov r15,8
+dec rcx;ignore title program
+mov r15,0
     print_args:
+    
+    push rdi
+    push rsi
+    
+    
+    
+    add rsp,r15
+    sub rsp,8
+    
+    mov rdi,[rsi]
+    call puts
+    
+    add rsp,8
 
+
+    pop rsi
+    pop rdi
+    
+
+    counter
+    
     
     
 
-    ;counter
+    cmp rcx,1
+    je exit
+    dec rcx
+    add r15,8
+    jmp print_args
     
-    
-    mov rax,rcx
-    call WriteInt
-    loop print_args
-    
-ret
+    exit:
+    ret
 
 
 section .data
