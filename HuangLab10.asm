@@ -4,6 +4,8 @@
 
 %include "CPsub64.inc"
 %include "Macros_CPsub64.inc"
+extern puts
+
 global main
 
 section .text
@@ -12,8 +14,29 @@ main:
 
 
 start:
-;print the first message
 
+
+mov rcx,rdi
+mov r14,rdi
+dec r14
+mov rax,rcx
+
+
+;check if there are zero arguments
+cmp r14,0
+jne notZero
+mov rdx,noArgs
+call WriteString
+call Crlf
+jmp exit
+
+notZero:
+call WriteDec
+call Crlf
+mov r15,8
+
+
+;prologue
 push rax
 push rdx
 
