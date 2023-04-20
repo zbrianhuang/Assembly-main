@@ -1,63 +1,55 @@
 ;Brian Huang
 ;4/19/23
 ;Lab 10
-
+;Macro prints out math expressions
 %include "CPsub64.inc"
 %include "Macros_CPsub64.inc"
-extern puts
+%include "Lab10Macro.inc"
 
 global main
 
 section .text
 main:
 
+;retrieve arguments
+push rsi
+push rdi
 
 
-start:
+add rsi,8
+mov r15,[rsi]
+
+add rsi,8
+mov r12,[rsi]
+
+add rsi,8
+mov r14,[rsi]
+
+pop rsi
+pop rdi
 
 
-mov rcx,rdi
-mov r14,rdi
-dec r14
-mov rax,rcx
+
+;Convert Strings to Integers
+mov rdx,r15
+mov rcx,255
+call ParseInteger64
+mov r15,rax
+
+mov rdx, r14
+mov rcx,255
+call ParseInteger64
+mov r14,rax
 
 
-;check if there are zero arguments
-cmp r14,0
-jne notZero
-mov rdx,noArgs
-call WriteString
-call Crlf
-jmp exit
-
-notZero:
-call WriteDec
-call Crlf
-mov r15,8
-
-
-;prologue
+;call math function
 push rax
 push rdx
 
-
 call math
-
 
 pop rax
 pop rdx
-
-;continue?
-mov rdx, continue
-call WriteString
-call Crlf
-mov rdx,userInput
-mov rcx,255
-call ReadString
-movzx rdx, word [userInput];
-cmp rdx,'y'
-je start
-
 
 
 ;exit
@@ -79,9 +71,9 @@ push rbx
 
 
 
-movzx rdx, word [userInput]
+movzx rdx, word [r12]
 cmp rdx, '+' ;2bh in hex
-je addition;equALS
+je addition
 
 cmp rdx, '-'
 je subtraction
@@ -97,87 +89,48 @@ je multiplication
 
 
 subtraction:
+mov r13,r15
 sub r15,r14
-mov rdx,resultMessage
-call WriteString
-mov rax,r13
-call WriteDec
-mov rdx,userInput
-call WriteString
-mov rax,r14
-call WriteDec
-mov rdx,equals
-call WriteString
-mov rax,r15
-call WriteInt
+print_exp resultMessage,r13,r12,r14,equals,r15;macro use
 jmp result
 
 addition:
 
 ;do da addition
+mov r13,r15;save initial values
 add r15,r14
-mov rdx,resultMessage
-call WriteString
-mov rax,r13
-call WriteDec
-mov rdx,userInput
-call WriteString
-mov rax,r14
-call WriteDec
-mov rdx,equals
-call WriteString
-mov rax,r15
-call WriteInt
+
+print_exp resultMessage,r13,r12,r14,equals,r15
+
 jmp result
 
 multiplication:
+mov r13,r15;save initial value
 mov rax,r15
 imul r14
 mov r15,rax;save the result back to r15
-mov rdx,resultMessage
-call WriteString
-mov rax,r13
-call WriteDec
-mov rdx,userInput
-call WriteString
-mov rax,r14
-call WriteDec
-mov rdx,equals
-call WriteString
-mov rax,r15
-call WriteInt
+
+print_exp resultMessage,r13,r12,r14,equals,r15
 jmp result
 
 division:
+mov r13,r15 ;save inital input
 mov rax,r15
 mov rdx,0
 idiv dword r14
 mov r15,rax
-mov r12,rdx
-mov rdx,resultMessage
-call WriteString
-mov rax,r13
-call WriteDec
-mov rdx,userInput
-call WriteString
-mov rax,r14
-call WriteDec
-mov rdx,equals
-call WriteString
-mov rax,r15
-call WriteInt
+mov r11,rdx
+
+print_exp resultMessage,r13,r12,r14,equals,r15
+;print remainder since its not included in macro
 mov rdx,r
 call WriteString
-mov rax,r12
+mov rax,r11
 call WriteDec
 
 jmp result
 
 result:
-;display answer 
-
-;result
-
 
 call Crlf
 
@@ -188,25 +141,11 @@ ret
 
 
 
-;get Input
+
 
 section .data
-addMessage: db "You will be asked for two numbers and an operator.",0ah	;first message
-addMessageLen: equ($-addMessage) 								;get length of firstMessage									;getLength of Division Message
-secondMessage: db "Please enter the first number",0ah 				;second message
-secondMessageLen: equ($-secondMessage)								;get length of secondMessage
-thirdMessage: db "Please enter the second number",0ah			;third message
-thirdMessageLen:equ($-thirdMessage)								;get the length of the third message
-lineBreak: db "",0ah
-lineBreakLen: equ($-lineBreak)
-operatorMsg: db "Please enter an arithmetic operator",0,0ah
-operatorMsgLen: equ($-operatorMsg)
 resultMessage:db"Result:",0,0ah
 equals:db '=',0,0ah
 equalslen: equ($-equals)
-continue: db "Continue? y/n",0,0ah
-
-y: db  "y",0
 r: db " remainder:",0
-section .bss
-userInput: resb 255	
+
